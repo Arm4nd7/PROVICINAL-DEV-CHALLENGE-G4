@@ -1,0 +1,25 @@
+main{
+    display: flex;
+    gap: 2rem;
+}
+
+.card{
+    margin-top: 3rem;
+    flex-direction: row;
+    width: 18rem; 
+    margin: 2rem;
+}
+
+.card-body{
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.opciones{
+    display: flex;
+    margin: 2rem;
+    gap: 2rem;
+    justify-content: flex-end;
+}
+
