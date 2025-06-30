@@ -6,7 +6,7 @@ import {
     readOne,
     updateOne,
     deleteOne,
-} from "../controllers/car.controllers.js";
+} from "../controllers/usuario.controllers.js";
 
 const router = Router();
 
