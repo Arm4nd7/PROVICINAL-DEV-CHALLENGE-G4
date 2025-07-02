@@ -1,0 +1,42 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f1f1f1;
+}
+
+h2, h4 {
+  color: #333;
+}
+
+#mapa {
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  height: 300px;
+}
+
+form input {
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+}
+
+#chat {
+  background-color: #ffffff;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  padding: 10px;
+  height: 200px;
+  overflow-y: auto;
+  font-size: 0.95rem;
+}
+
+#chat div {
+  margin-bottom: 5px;
+}
+
+#mensaje {
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+}
+
+button {
+  border-radius: 5px;
+}
