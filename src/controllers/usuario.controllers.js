@@ -1,56 +1,47 @@
-import { pool } from "../db.js";
-//vamos a exportar las consultas
+// controllers/usuario.controllers.js
+import { UsuarioModel } from "../models/usuario.model.js";
 
 export const createOne = async (req, res) => {
-    try {
-        const data = req.body;
-        const { rows } = await pool.query(
-            "INSERT INTO usuario(nombre, email, contrasena, tipo_usuario, telefono, facultad) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-            [data.nombre, data.email, data.contrasena, data.tipo_usuario, data.telefono, data.facultad]
-        );
-        return res.json({ message: "SE INSERTO" }, rows[0]);
-    } catch (e) {
-        console.log(e);
-        if (e?.code === "23505") {
-            return res.status(409).json({ message: "Email already exists" });
-        }
-        return res.status(500).json({ message: "Internal server error" });
+    const data = req.body;
+    const result = await UsuarioModel.create(data);
+
+    if (!result.success) {
+        return res.status(result.status).json({ message: result.message });
     }
+    return res.status(201).json({ message: "SE INSERTO", data: result.data });
 };
 
 export const readAll = async (req, res) => {
-    const { rows } = await pool.query("SELECT * FROM usuario");
-    res.json(rows);
+    const usuarios = await UsuarioModel.getAll();
+    res.json(usuarios);
 };
 
 export const readOne = async (req, res) => {
     const { id } = req.params;
-    const { rows } = await pool.query("SELECT * FROM usuario WHERE id = $1", [
-        id,
-    ]);
-    if (rows.length === 0) {
+    const usuario = await UsuarioModel.getById(id);
+
+    if (!usuario) {
         return res.status(404).json({ message: "usuario no encontrado" });
     }
-    res.json(rows);
+    res.json(usuario);
 };
 
 export const updateOne = async (req, res) => {
     const { id } = req.params;
     const data = req.body;
-    const { rows } = await pool.query(
-        "UPDATE usuario SET nombre = $1, email = $2, contrasena = $3, tipo_usuario = $4, telefono = $5, facultad = $6 WHEREA id = $7 RETURNING *",
-        [data.nombre, data.email, data.contrasena, data.tipo_usuario, data.telefono, data.facultad, id]
-    );
-    return res.json(rows[0]);
+    const result = await UsuarioModel.update(id, data);
+
+    if (!result.success) {
+        return res.status(result.status).json({ message: result.message });
+    }
+    return res.json(result.data);
 };
 
 export const deleteOne = async (req, res) => {
     const { id } = req.params;
-    const { rowsCount } = await pool.query(
-        "DELETE FROM usuario WHERE id = $1 RETURNING *",
-        [id]
-    );
-    if (rowsCount.length === 0) {
+    const deleted = await UsuarioModel.delete(id);
+
+    if (!deleted) {
         return res.status(404).json({ message: "el usuario no existe" });
     }
     return res.sendStatus(204);

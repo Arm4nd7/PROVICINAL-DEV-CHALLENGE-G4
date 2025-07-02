@@ -1,56 +1,47 @@
-import { pool } from "../db.js";
-//vamos a exportar las consultas
+// controllers/vehiculo.controllers.js
+import { VehiculoModel } from "../models/vehiculo.model.js";
 
 export const createOne = async (req, res) => {
-    try {
-        const data = req.body;
-        const { rows } = await pool.query(
-            "INSERT INTO vehiculo(usuario_id, marca, modelo, placa) VALUES ($1, $2, $3, $4) RETURNING *",
-            [data.usuario_id, data.marca, data.modelo, data.placa]
-        );
-        return res.json({ message: "SE INSERTO" }, rows[0]);
-    } catch (e) {
-        console.log(e);
-        if (e?.code === "23505") {
-            return res.status(409).json({ message: "placa already exists" });
-        }
-        return res.status(500).json({ message: "Internal server error" });
+    const data = req.body;
+    const result = await VehiculoModel.create(data);
+
+    if (!result.success) {
+        return res.status(result.status).json({ message: result.message });
     }
+    return res.status(201).json({ message: "SE INSERTO", data: result.data });
 };
 
 export const readAll = async (req, res) => {
-    const { rows } = await pool.query("SELECT * FROM vehiculo");
-    res.json(rows);
+    const vehiculos = await VehiculoModel.getAll();
+    res.json(vehiculos);
 };
 
 export const readOne = async (req, res) => {
     const { id } = req.params;
-    const { rows } = await pool.query("SELECT * FROM vehiculo WHERE id = $1", [
-        id,
-    ]);
-    if (rows.length === 0) {
+    const vehiculo = await VehiculoModel.getById(id);
+
+    if (!vehiculo) {
         return res.status(404).json({ message: "vehiculo no encontrado" });
     }
-    res.json(rows);
+    res.json(vehiculo);
 };
 
 export const updateOne = async (req, res) => {
     const { id } = req.params;
     const data = req.body;
-    const { rows } = await pool.query(
-        "UPDATE vehiculo SET usuario_id = $1, marca = $2, modelo = $3, placa = $4 WHEREA id = $5 RETURNING *",
-        [data.usuario_id, data.marca, data.modelo, data.placa, id]
-    );
-    return res.json(rows[0]);
+    const result = await VehiculoModel.update(id, data);
+
+    if (!result.success) {
+        return res.status(result.status).json({ message: result.message });
+    }
+    return res.json(result.data);
 };
 
 export const deleteOne = async (req, res) => {
     const { id } = req.params;
-    const { rowsCount } = await pool.query(
-        "DELETE FROM vehiculo WHERE id = $1 RETURNING *",
-        [id]
-    );
-    if (rowsCount.length === 0) {
+    const deleted = await VehiculoModel.delete(id);
+
+    if (!deleted) {
         return res.status(404).json({ message: "el vehiculo no existe" });
     }
     return res.sendStatus(204);

@@ -1,56 +1,47 @@
-import { pool } from "../db.js";
-//vamos a exportar las consultas
+// controllers/valoracion.controllers.js
+import { ValoracionModel } from "../models/valoracion.model.js";
 
 export const createOne = async (req, res) => {
-    try {
-        const data = req.body;
-        const { rows } = await pool.query(
-            "INSERT INTO valoracion(de_usuario_id, para_usuario_id, viaje_id, calificacion, comentario) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-            [data.de_usuario_id, data.para_usuario_id, data.viaje_id, data.calificacion, data.comentario]
-        );
-        return res.json({ message: "SE INSERTO" }, rows[0]);
-    } catch (e) {
-        console.log(e);
-        if (e?.code === "23505") {
-            return res.status(409).json({ message: "ERROR" });
-        }
-        return res.status(500).json({ message: "Internal server error" });
+    const data = req.body;
+    const result = await ValoracionModel.create(data);
+
+    if (!result.success) {
+        return res.status(result.status).json({ message: result.message });
     }
+    return res.status(201).json({ message: "SE INSERTO", data: result.data });
 };
 
 export const readAll = async (req, res) => {
-    const { rows } = await pool.query("SELECT * FROM valoracion");
-    res.json(rows);
+    const valoraciones = await ValoracionModel.getAll();
+    res.json(valoraciones);
 };
 
 export const readOne = async (req, res) => {
     const { id } = req.params;
-    const { rows } = await pool.query("SELECT * FROM valoracion WHERE id = $1", [
-        id,
-    ]);
-    if (rows.length === 0) {
+    const valoracion = await ValoracionModel.getById(id);
+
+    if (!valoracion) {
         return res.status(404).json({ message: "valoracion no encontrada" });
     }
-    res.json(rows);
+    res.json(valoracion);
 };
 
 export const updateOne = async (req, res) => {
     const { id } = req.params;
     const data = req.body;
-    const { rows } = await pool.query(
-        "UPDATE valoracion SET de_usuario_id = $1, para_usuario_id = $2, viaje_id = $3, calificacion = $4, comentario = $5 WHEREA id = $6 RETURNING *",
-        [data.de_usuario_id, data.para_usuario_id, data.viaje_id, data.calificacion, data.comentario, id]
-    );
-    return res.json(rows[0]);
+    const result = await ValoracionModel.update(id, data);
+
+    if (!result.success) {
+        return res.status(result.status).json({ message: result.message });
+    }
+    return res.json(result.data);
 };
 
 export const deleteOne = async (req, res) => {
     const { id } = req.params;
-    const { rowsCount } = await pool.query(
-        "DELETE FROM valoracion WHERE id = $1 RETURNING *",
-        [id]
-    );
-    if (rowsCount.length === 0) {
+    const deleted = await ValoracionModel.delete(id);
+
+    if (!deleted) {
         return res.status(404).json({ message: "la valoracion no existe" });
     }
     return res.sendStatus(204);

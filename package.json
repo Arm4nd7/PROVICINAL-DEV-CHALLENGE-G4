@@ -5,6 +5,7 @@
   "main": "index2.js",
   "type": "module",
   "scripts": {
+    "start": "node index2.js",
     "dev": "node --env-file .env --watch src/index2.js"
   },
   "keywords": [],

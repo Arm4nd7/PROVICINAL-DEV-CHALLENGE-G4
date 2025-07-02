@@ -1,57 +1,50 @@
-import { pool } from "../db.js";
-//vamos a exportar las consultas
+// controllers/solicitudViaje.controllers.js
+import { SolicitudViajeModel } from "../models/solicitudViaje.model.js";
 
 export const createOne = async (req, res) => {
-    try {
-        const data = req.body;
-        const { rows } = await pool.query(
-            "INSERT INTO solicitudViaje(viaje_id, pasajero_id, estado) VALUES ($1, $2, $3) RETURNING *",
-            [data.viaje_id, data.pasajero_id, data.estado],
-        );
-        return res.json({ message: "SE INSERTO" }, rows[0]);
-    } catch (e) {
-        console.log(e);
-        if (e?.code === "23505") {
-            return res.status(409).json({ message: "la solicitud de viaje ya existe exists" });
-        }
-        return res.status(500).json({ message: "Internal server error" });
+    const data = req.body;
+    const result = await SolicitudViajeModel.create(data);
+
+    if (!result.success) {
+        return res.status(result.status).json({ message: result.message });
     }
+    return res.status(201).json({ message: "SE INSERTO", data: result.data });
 };
 
 export const readAll = async (req, res) => {
-    const { rows } = await pool.query("SELECT * FROM solicitudViaje");
-    res.json(rows);
+    const solicitudes = await SolicitudViajeModel.getAll();
+    res.json(solicitudes);
 };
 
 export const readOne = async (req, res) => {
     const { id } = req.params;
-    const { rows } = await pool.query("SELECT * FROM solicitudViaje WHERE id = $1", [
-        id,
-    ]);
-    if (rows.length === 0) {
-        return res.status(404).json({ message: "solicitud de viaje no encontrado" });
+    const solicitud = await SolicitudViajeModel.getById(id);
+
+    if (!solicitud) {
+        return res
+            .status(404)
+            .json({ message: "solicitud de viaje no encontrado" });
     }
-    res.json(rows);
+    res.json(solicitud);
 };
 
 export const updateOne = async (req, res) => {
     const { id } = req.params;
     const data = req.body;
-    const { rows } = await pool.query(
-        "UPDATE solicitudViaje SET viaje_id = $1, pasajero_id = $2, estado = $3 WHERE id = $4 RETURNING *",
-        [data.viaje_id, data.pasajero_id, data.estado, id]
-    );
-    return res.json(rows[0]);
+    const result = await SolicitudViajeModel.update(id, data);
+
+    if (!result.success) {
+        return res.status(result.status).json({ message: result.message });
+    }
+    return res.json(result.data);
 };
 
 export const deleteOne = async (req, res) => {
     const { id } = req.params;
-    const { rowsCount } = await pool.query(
-        "DELETE FROM solicitudViaje WHERE id = $1 RETURNING *",
-        [id]
-    );
-    if (rowsCount.length === 0) {
-        return res.status(404).json({ message: "la solictud de viaje no existe" });
+    const deleted = await SolicitudViajeModel.delete(id);
+
+    if (!deleted) {
+        return res.status(404).json({ message: "la solicitud de viaje no existe" });
     }
     return res.sendStatus(204);
 };

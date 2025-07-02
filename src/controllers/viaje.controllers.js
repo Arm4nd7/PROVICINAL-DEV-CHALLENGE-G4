@@ -1,56 +1,47 @@
-import { pool } from "../db.js";
-//vamos a exportar las consultas
+// controllers/viaje.controllers.js
+import { ViajeModel } from "../models/viaje.model.js";
 
 export const createOne = async (req, res) => {
-    try {
-        const data = req.body;
-        const { rows } = await pool.query(
-            "INSERT INTO viaje(conductor_id, punto_encuentro_id, hora_salida, cupos_disponibles) VALUES ($1, $2, $3, $4) RETURNING *",
-            [data.conductor_id, data.punto_encuentro_id, data.hora_salida, data.cupos_disponibles]
-        );
-        return res.json({ message: "SE INSERTO" }, rows[0]);
-    } catch (e) {
-        console.log(e);
-        if (e?.code === "23505") {
-            return res.status(409).json({ message: "ERROR" });
-        }
-        return res.status(500).json({ message: "Internal server error" });
+    const data = req.body;
+    const result = await ViajeModel.create(data);
+
+    if (!result.success) {
+        return res.status(result.status).json({ message: result.message });
     }
+    return res.status(201).json({ message: "SE INSERTO", data: result.data });
 };
 
 export const readAll = async (req, res) => {
-    const { rows } = await pool.query("SELECT * FROM viaje");
-    res.json(rows);
+    const viajes = await ViajeModel.getAll();
+    res.json(viajes);
 };
 
 export const readOne = async (req, res) => {
     const { id } = req.params;
-    const { rows } = await pool.query("SELECT * FROM viaje WHERE id = $1", [
-        id,
-    ]);
-    if (rows.length === 0) {
+    const viaje = await ViajeModel.getById(id);
+
+    if (!viaje) {
         return res.status(404).json({ message: "viaje no encontrado" });
     }
-    res.json(rows);
+    res.json(viaje);
 };
 
 export const updateOne = async (req, res) => {
     const { id } = req.params;
     const data = req.body;
-    const { rows } = await pool.query(
-        "UPDATE viaje SET conductor_id = $1, punto_encuentro_id = $2, hora_salida = $3, cupos_disponibles = $4 WHEREA id = $5 RETURNING *",
-        [data.conductor_id, data.punto_encuentro_id, data.hora_salida, data.cupos_disponibles, id]
-    );
-    return res.json(rows[0]);
+    const result = await ViajeModel.update(id, data);
+
+    if (!result.success) {
+        return res.status(result.status).json({ message: result.message });
+    }
+    return res.json(result.data);
 };
 
 export const deleteOne = async (req, res) => {
     const { id } = req.params;
-    const { rowsCount } = await pool.query(
-        "DELETE FROM viaje WHERE id = $1 RETURNING *",
-        [id]
-    );
-    if (rowsCount.length === 0) {
+    const deleted = await ViajeModel.delete(id);
+
+    if (!deleted) {
         return res.status(404).json({ message: "el viaje no existe" });
     }
     return res.sendStatus(204);
