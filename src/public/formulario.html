@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro | TinUdriv</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="login-container">
+    <div class="card p-4 login-card">
+      <div class="text-center mb-4">
+        <div class="logo">TinUdriv</div>
+        <small class="text-muted">Crea tu cuenta y únete al viaje 🚗</small>
+      </div>
+
+      <form action="/usuario" method="POST">
+        <div class="mb-3">
+          <label for="nombre" class="form-label">Nombre completo</label>
+          <input type="text" class="form-control" id="nombre" name="nombre" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label">Correo institucional</label>
+          <input type="email" class="form-control" id="email" name="email" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="contrasena" class="form-label">Contraseña</label>
+          <input type="password" class="form-control" id="contrasena" name="contrasena" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="telefono" class="form-label">Teléfono</label>
+          <input type="tel" class="form-control" id="telefono" name="telefono" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="facultad" class="form-label">Facultad</label>
+          <input type="text" class="form-control" id="facultad" name="facultad" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="tipo_usuario" class="form-label">Tipo de usuario</label>
+          <select class="form-select" id="tipo_usuario" name="tipo_usuario" required>
+            <option value="">Selecciona...</option>
+            <option value="conductor">Conductor</option>
+            <option value="pasajero">Pasajero</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100">Registrarme</button>
+
+        <div class="text-center mt-3">
+          <a href="/login">¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -11,6 +11,26 @@ export const createOne = async (req, res) => {
     return res.status(201).json({ message: "SE INSERTO", data: result.data });
 };
 
+export const login = async (req, res) => {
+    const { email, contrasena } = req.body;
+    
+    if (!email || !contrasena) {
+        return res.status(400).json({ message: "Email y contraseña son requeridos" });
+    }
+
+    const result = await UsuarioModel.login(email, contrasena);
+    
+    if (!result.success) {
+        return res.status(result.status).json({ message: result.message });
+    }
+    
+    return res.json({ 
+        message: "Login exitoso", 
+        data: result.data,
+        token: result.token 
+    });
+};
+
 export const readAll = async (req, res) => {
     const usuarios = await UsuarioModel.getAll();
     res.json(usuarios);

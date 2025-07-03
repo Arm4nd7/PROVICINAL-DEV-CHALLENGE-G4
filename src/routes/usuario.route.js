@@ -2,6 +2,7 @@ import { Router } from "express";
 // import { pool } from "../db.js";
 import {
     createOne,
+    login,
     readAll,
     readOne,
     updateOne,
@@ -11,6 +12,7 @@ import {
 const router = Router();
 
 router.post("/", createOne);
+router.post("/login", login);
 
 router.get("/", readAll);
 

@@ -25,6 +25,42 @@ export class UsuarioModel {
     }
   }
 
+  static async login(email, contrasena) {
+    try {
+      const { rows } = await pool.query(
+        "SELECT * FROM usuario WHERE email = $1 AND contrasena = $2",
+        [email, contrasena]
+      );
+      
+      if (rows.length === 0) {
+        return { 
+          success: false, 
+          message: "Email o contraseña incorrectos", 
+          status: 401 
+        };
+      }
+      
+      const usuario = rows[0];
+      // En un entorno real, aquí generarías un JWT token
+      const token = `token_${usuario.id}_${Date.now()}`;
+      
+      return { 
+        success: true, 
+        data: {
+          id: usuario.id,
+          nombre: usuario.nombre,
+          email: usuario.email,
+          tipo_usuario: usuario.tipo_usuario,
+          facultad: usuario.facultad
+        },
+        token: token
+      };
+    } catch (e) {
+      console.error(e);
+      return { success: false, message: "Internal server error", status: 500 };
+    }
+  }
+
   static async getAll() {
     const { rows } = await pool.query("SELECT * FROM usuario");
     return rows;
