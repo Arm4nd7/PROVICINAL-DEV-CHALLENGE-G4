@@ -11,13 +11,9 @@ import {
 const router = Router();
 
 router.post("/", createOne);
-
 router.get("/", readAll);
-
 router.get("/:id", readOne);
-
 router.put("/:id", updateOne);
-
-router.delete("/:id", deleteOne);
+router.delete("/:id",deleteOne);
 
 export default router;

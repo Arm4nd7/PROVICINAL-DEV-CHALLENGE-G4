@@ -1,3 +1,4 @@
+import "dotenv/config"; 
 import express from "express";
 import { PORT } from "./config/config.js";
 import debug from "debug";
@@ -18,10 +19,11 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(cors());
 app.use(morgan("dev"));
-app.use(express.json());
-
 // Servir archivos estáticos
 app.use(express.static(path.join(__dirname, "public")));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 // Rutas de la API
 app.use("/usuario", usuarioRoute);
@@ -40,10 +42,19 @@ app.get("/login", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
+app.get("/dashboard", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+});
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: "Algo salió mal en el servidor!", error: err.message });
+});
+
 app
     .listen(PORT, () => {
         debug("server on port ", PORT);
-        console.log("Hola mundo devchallenege", PORT);
+        console.log("Hola mundo devchallenege, server on", PORT);
     })
     .on("error", (err) => {
         debug(err);

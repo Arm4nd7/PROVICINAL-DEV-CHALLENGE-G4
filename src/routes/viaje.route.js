@@ -8,16 +8,19 @@ import {
     deleteOne,
 } from "../controllers/viaje.controllers.js";
 
+import {authenticateToken, authorizeRoles} from '../middlewares/auth.middlewares.js';
+
+
 const router = Router();
 
-router.post("/", createOne);
+router.post("/", authenticateToken, authorizeRoles(['pasajero']),createOne);
 
 router.get("/", readAll);
 
 router.get("/:id", readOne);
 
-router.put("/:id", updateOne);
+router.put("/:id", authenticateToken, authorizeRoles(['pasajero']) , updateOne);
 
-router.delete("/:id", deleteOne);
+router.delete("/:id", authenticateToken, authorizeRoles(['conductor']), deleteOne);
 
 export default router;

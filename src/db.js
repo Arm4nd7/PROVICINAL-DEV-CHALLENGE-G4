@@ -11,5 +11,5 @@ export const pool = new pg.Pool({
     host: DB_HOST,
     password: DB_PASSWORD,
     database: DB_DATABASE,
-    prot: DB_PORT,
+    port: DB_PORT,
 });

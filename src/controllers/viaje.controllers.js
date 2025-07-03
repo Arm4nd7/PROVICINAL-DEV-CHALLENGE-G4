@@ -2,13 +2,27 @@
 import { ViajeModel } from "../models/viaje.model.js";
 
 export const createOne = async (req, res) => {
-    const data = req.body;
-    const result = await ViajeModel.create(data);
+    const { punto_encuentro_id, hora_salida, cupos_disponibles } = req.body;
 
-    if (!result.success) {
-        return res.status(result.status).json({ message: result.message });
+    const conductor_id = req.user.id;
+
+    const data = {
+        conductor_id,
+        punto_encuentro_id,
+        hora_salida,
+        cupos_disponibles
+    };
+    try {
+        const result = await ViajeModel.create(data);
+
+        if (!result.success) {
+            return res.status(result.status).json({ message: result.message });
+        }
+        return res.status(201).json({ message: "SE INSERTO", data: result.data });
+    } catch (error) {
+        console.error("Error en createOne (viaje.controllers.js):", error);
+        return res.status(500).json({ message: "Error interno del servidor al crear viaje." });
     }
-    return res.status(201).json({ message: "SE INSERTO", data: result.data });
 };
 
 export const readAll = async (req, res) => {

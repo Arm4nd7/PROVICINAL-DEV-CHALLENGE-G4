@@ -1,5 +1,8 @@
 // models/usuario.model.js
 import { pool } from "../db.js";
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { JWT_SECRET } from '../config/config.js'
 
 export class UsuarioModel {
   static async create({
@@ -11,9 +14,14 @@ export class UsuarioModel {
     facultad,
   }) {
     try {
+      const saltRounds = 10;
+      // const salt = await bcrypt.genSalt(10);
+      console.log('Valor de contrasena antes de hash:', contrasena, 'Tipo:', typeof contrasena); // <-- AÑADE ESTA LÍNEA
+      console.log('Valor de saltRounds antes de hash:', saltRounds, 'Tipo:', typeof saltRounds); // <-- Y ESTA LÍNEA
+      const hashedPassword = await bcrypt.hash(contrasena, saltRounds);
       const { rows } = await pool.query(
         "INSERT INTO usuario(nombre, email, contrasena, tipo_usuario, telefono, facultad) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-        [nombre, email, contrasena, tipo_usuario, telefono, facultad]
+        [nombre, email, hashedPassword, tipo_usuario, telefono, facultad]
       );
       return { success: true, data: rows[0] };
     } catch (e) {
@@ -28,24 +36,36 @@ export class UsuarioModel {
   static async login(email, contrasena) {
     try {
       const { rows } = await pool.query(
-        "SELECT * FROM usuario WHERE email = $1 AND contrasena = $2",
-        [email, contrasena]
+        "SELECT * FROM usuario WHERE email = $1",
+        [email]
       );
-      
+
       if (rows.length === 0) {
-        return { 
-          success: false, 
-          message: "Email o contraseña incorrectos", 
-          status: 401 
+        return {
+          success: false,
+          message: "Email o contrasena incorrectos",
+          status: 401
         };
       }
-      
+
       const usuario = rows[0];
-      // En un entorno real, aquí generarías un JWT token
-      const token = `token_${usuario.id}_${Date.now()}`;
-      
-      return { 
-        success: true, 
+      const isMatch = await bcrypt.compare(contrasena, usuario.contrasena);
+      if (!isMatch) {
+        return {
+          success: false,
+          message: "Email o contrasena incorrectos",
+          status: 401,
+        };
+      }
+      const payload = {
+        id: usuario.id,
+        email: usuario.email,
+        tipo_usuario: usuario.tipo_usuario,
+      };
+      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
+
+      return {
+        success: true,
         data: {
           id: usuario.id,
           nombre: usuario.nombre,
@@ -78,9 +98,15 @@ export class UsuarioModel {
     { nombre, email, contrasena, tipo_usuario, telefono, facultad }
   ) {
     try {
+      let hashedPassword = contrasena;
+      //hashearla contrasena nueva
+      if (contrasena) {
+        const salt = await bcrypt.genSalt(10);
+        hashedPassword = await bcrypt.hash(contrasena, salt);
+      }
       const { rows } = await pool.query(
         "UPDATE usuario SET nombre = $1, email = $2, contrasena = $3, tipo_usuario = $4, telefono = $5, facultad = $6 WHERE id = $7 RETURNING *",
-        [nombre, email, contrasena, tipo_usuario, telefono, facultad, id]
+        [nombre, email, hashedPassword, tipo_usuario, telefono, facultad, id]
       );
       return { success: true, data: rows[0] };
     } catch (e) {

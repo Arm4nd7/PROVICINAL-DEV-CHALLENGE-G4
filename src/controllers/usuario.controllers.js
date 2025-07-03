@@ -4,11 +4,16 @@ import { UsuarioModel } from "../models/usuario.model.js";
 export const createOne = async (req, res) => {
     const data = req.body;
     const result = await UsuarioModel.create(data);
+    console.log("Datos recibidos en el controlador:", data); 
+    console.log("Contraseña recibida:", data.contrasena);
 
     if (!result.success) {
         return res.status(result.status).json({ message: result.message });
     }
-    return res.status(201).json({ message: "SE INSERTO", data: result.data });
+    // return res.status(201).json({ message: "SE INSERTO", data: result.data });
+    const successMessage = encodeURIComponent("¡Usuario registrado exitosamente! Inicia sesión.");
+    return res.redirect(`/login?status=success&message=${successMessage}`);
+
 };
 
 export const login = async (req, res) => {
